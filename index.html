@@ -4,27 +4,6 @@
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CleverTap Integration Demo</title>
-    <script type="text/javascript">
-      // Debug info
-      console.log("Current URL:", window.location.href);
-      console.log(
-        "Is localhost:",
-        window.location.hostname === "localhost" ||
-          window.location.hostname === "127.0.0.1"
-      );
-      console.log("Protocol:", window.location.protocol);
-
-      // Force service worker scope for localhost
-      if (
-        window.location.hostname === "localhost" ||
-        window.location.hostname === "127.0.0.1"
-      ) {
-        window.clevertapConfig = {
-          serviceWorkerPath: "/clevertap_sw.js",
-          serviceWorkerScope: "/",
-        };
-      }
-    </script>
 
     <!-- Enable CleverTap Debug Logging -->
     <script type="text/javascript">

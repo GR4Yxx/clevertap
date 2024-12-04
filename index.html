@@ -8,27 +8,15 @@
     <!-- Enable CleverTap Debug Logging and Configuration -->
     <script type="text/javascript">
       sessionStorage.setItem("WZRK_D", "3");
+      console.log("Debug mode initialized:", sessionStorage.getItem("WZRK_D"));
 
-      // Configure CleverTap service worker
       window.clevertapConfig = {
         serviceWorkerPath: "/clevertap/clevertap_sw.js",
         serviceWorkerScope: "/clevertap/",
+        skipRegister: true,
       };
 
-      if ("serviceWorker" in navigator) {
-        navigator.serviceWorker
-          .register("/clevertap/clevertap_sw.js", {
-            scope: "/clevertap/",
-          })
-          .then(function (registration) {
-            console.log("Service worker registration succeeded:", registration);
-          })
-          .catch(function (error) {
-            console.log("Service worker registration failed:", error);
-          });
-      }
-
-      // Initialize CleverTap once
+      // Initialize CleverTap
       var clevertap = {
         event: [],
         profile: [],
@@ -42,6 +30,7 @@
         },
       };
 
+      // Add account ID
       clevertap.account.push({ id: "Z44-Z4K-K65Z" });
     </script>
 
@@ -55,6 +44,26 @@
           ("https:" == document.location.protocol
             ? "https://d2r1yp2w7bby2u.cloudfront.net"
             : "http://static.clevertap.com") + "/js/clevertap.min.js";
+
+        wzrk.onload = function () {
+          // Register service worker after CleverTap loads
+          if ("serviceWorker" in navigator) {
+            navigator.serviceWorker
+              .register("/clevertap/clevertap_sw.js", {
+                scope: "/clevertap/",
+              })
+              .then(function (registration) {
+                console.log(
+                  "Service worker registration succeeded:",
+                  registration
+                );
+              })
+              .catch(function (error) {
+                console.log("Service worker registration failed:", error);
+              });
+          }
+        };
+
         var s = document.getElementsByTagName("script")[0];
         s.parentNode.insertBefore(wzrk, s);
       })();
@@ -243,7 +252,9 @@
       function handleLogin() {
         if (!validateForm()) return;
 
-        clevertap.onUserLogin.push(getUserData());
+        const userData = getUserData();
+        console.log("Sending login data:", userData);
+        clevertap.onUserLogin.push(userData);
         alert("Login event pushed to CleverTap!");
       }
 
@@ -251,12 +262,15 @@
       function handleProfilePush() {
         if (!validateForm()) return;
 
-        clevertap.profile.push(getUserData());
+        const userData = getUserData();
+        console.log("Pushing profile data:", userData);
+        clevertap.profile.push(userData);
         alert("Profile pushed to CleverTap!");
       }
 
       // Handle push notification request
       function handlePushNotification() {
+        console.log("Requesting push notification permission");
         clevertap.notifications.push({
           titleText: "Would you like to receive Push Notifications?",
           bodyText:
@@ -282,6 +296,7 @@
           Rating: 4.5,
         };
 
+        console.log("Raising event with properties:", eventProperties);
         clevertap.event.push("Product Purchased", eventProperties);
         alert("Custom event raised with CleverTap!");
       }

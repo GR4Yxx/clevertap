@@ -5,9 +5,17 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CleverTap Integration Demo</title>
 
-    <!-- Enable CleverTap Debug Logging -->
+    <!-- Enable CleverTap Debug Logging and Configuration -->
     <script type="text/javascript">
       sessionStorage.setItem("WZRK_D", "3");
+
+      // Configure CleverTap service worker
+      window.clevertapConfig = {
+        serviceWorkerPath: "./clevertap_sw.js",
+        serviceWorkerScope: "/",
+      };
+
+      // Initialize CleverTap once
       var clevertap = {
         event: [],
         profile: [],
@@ -20,19 +28,12 @@
           console.log("CleverTap Debug:", msg);
         },
       };
+
+      clevertap.account.push({ id: "Z44-Z4K-K65Z" });
     </script>
 
     <!-- CleverTap Integration -->
     <script type="text/javascript">
-      var clevertap = {
-        event: [],
-        profile: [],
-        account: [],
-        onUserLogin: [],
-        notifications: [],
-        privacy: [],
-      };
-      clevertap.account.push({ id: "Z44-Z4K-K65Z" });
       (function () {
         var wzrk = document.createElement("script");
         wzrk.type = "text/javascript";

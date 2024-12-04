@@ -1,0 +1,297 @@
+<!DOCTYPE html>
+<html lang="en">
+  <head>
+    <meta charset="UTF-8" />
+    <meta name="viewport" content="width=device-width, initial-scale=1.0" />
+    <title>CleverTap Integration Demo</title>
+    <script type="text/javascript">
+      // Debug info
+      console.log("Current URL:", window.location.href);
+      console.log(
+        "Is localhost:",
+        window.location.hostname === "localhost" ||
+          window.location.hostname === "127.0.0.1"
+      );
+      console.log("Protocol:", window.location.protocol);
+
+      // Force service worker scope for localhost
+      if (
+        window.location.hostname === "localhost" ||
+        window.location.hostname === "127.0.0.1"
+      ) {
+        window.clevertapConfig = {
+          serviceWorkerPath: "/clevertap_sw.js",
+          serviceWorkerScope: "/",
+        };
+      }
+    </script>
+
+    <!-- Enable CleverTap Debug Logging -->
+    <script type="text/javascript">
+      sessionStorage.setItem("WZRK_D", "3");
+      var clevertap = {
+        event: [],
+        profile: [],
+        account: [],
+        onUserLogin: [],
+        notifications: [],
+        privacy: [],
+        debugLevel: 3,
+        debug: function (msg) {
+          console.log("CleverTap Debug:", msg);
+        },
+      };
+    </script>
+
+    <!-- CleverTap Integration -->
+    <script type="text/javascript">
+      var clevertap = {
+        event: [],
+        profile: [],
+        account: [],
+        onUserLogin: [],
+        notifications: [],
+        privacy: [],
+      };
+      clevertap.account.push({ id: "Z44-Z4K-K65Z" });
+      (function () {
+        var wzrk = document.createElement("script");
+        wzrk.type = "text/javascript";
+        wzrk.async = true;
+        wzrk.src =
+          ("https:" == document.location.protocol
+            ? "https://d2r1yp2w7bby2u.cloudfront.net"
+            : "http://static.clevertap.com") + "/js/clevertap.min.js";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(wzrk, s);
+      })();
+    </script>
+
+    <style>
+      body {
+        font-family: "Arial", sans-serif;
+        max-width: 800px;
+        margin: 0 auto;
+        padding: 20px;
+        background: #f5f5f5;
+      }
+
+      .container {
+        background: white;
+        padding: 30px;
+        border-radius: 10px;
+        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+      }
+
+      h1 {
+        color: #333;
+        text-align: center;
+        margin-bottom: 30px;
+      }
+
+      .form-group {
+        margin-bottom: 20px;
+      }
+
+      label {
+        display: block;
+        margin-bottom: 5px;
+        color: #555;
+      }
+
+      input {
+        width: 100%;
+        padding: 8px;
+        border: 1px solid #ddd;
+        border-radius: 4px;
+        box-sizing: border-box;
+      }
+
+      .button-group {
+        display: grid;
+        grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
+        gap: 10px;
+        margin-top: 20px;
+      }
+
+      button {
+        padding: 10px 20px;
+        border: none;
+        border-radius: 4px;
+        cursor: pointer;
+        font-weight: bold;
+        transition: background-color 0.3s;
+      }
+
+      .login-btn {
+        background-color: #4caf50;
+        color: white;
+      }
+
+      .profile-btn {
+        background-color: #2196f3;
+        color: white;
+      }
+
+      .push-btn {
+        background-color: #f28046;
+        color: white;
+      }
+
+      .event-btn {
+        background-color: #9c27b0;
+        color: white;
+      }
+
+      button:hover {
+        opacity: 0.9;
+      }
+
+      .error {
+        color: red;
+        font-size: 0.8em;
+        margin-top: 5px;
+      }
+    </style>
+  </head>
+  <body>
+    <div class="container">
+      <h1>CleverTap Integration Demo</h1>
+
+      <div class="form-group">
+        <label for="name">Name:</label>
+        <input type="text" id="name" required />
+        <div class="error" id="nameError"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="email">Email Address:</label>
+        <input type="email" id="email" required />
+        <div class="error" id="emailError"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="phone">Phone Number:</label>
+        <input type="tel" id="phone" placeholder="+1234567890" required />
+        <div class="error" id="phoneError"></div>
+      </div>
+
+      <div class="form-group">
+        <label for="dob">Date of Birth:</label>
+        <input type="date" id="dob" required />
+        <div class="error" id="dobError"></div>
+      </div>
+
+      <div class="button-group">
+        <button class="login-btn" onclick="handleLogin()">Login</button>
+        <button class="profile-btn" onclick="handleProfilePush()">
+          Profile Push
+        </button>
+        <button class="push-btn" onclick="handlePushNotification()">
+          Ask For Push
+        </button>
+        <button class="event-btn" onclick="handleEvent()">Raise Event</button>
+      </div>
+    </div>
+
+    <script>
+      // Utility function to validate form
+      function validateForm() {
+        let isValid = true;
+        const name = document.getElementById("name").value;
+        const email = document.getElementById("email").value;
+        const phone = document.getElementById("phone").value;
+        const dob = document.getElementById("dob").value;
+
+        // Clear previous errors
+        document
+          .querySelectorAll(".error")
+          .forEach((el) => (el.textContent = ""));
+
+        if (!name) {
+          document.getElementById("nameError").textContent = "Name is required";
+          isValid = false;
+        }
+
+        if (!email || !email.match(/^[^\s@]+@[^\s@]+\.[^\s@]+$/)) {
+          document.getElementById("emailError").textContent =
+            "Valid email is required";
+          isValid = false;
+        }
+
+        if (!phone || !phone.match(/^\+?[\d\s-]{10,}$/)) {
+          document.getElementById("phoneError").textContent =
+            "Valid phone number is required";
+          isValid = false;
+        }
+
+        if (!dob) {
+          document.getElementById("dobError").textContent =
+            "Date of birth is required";
+          isValid = false;
+        }
+
+        return isValid;
+      }
+
+      // Get user data
+      function getUserData() {
+        return {
+          Site: {
+            Name: document.getElementById("name").value,
+            Email: document.getElementById("email").value,
+            Phone: document.getElementById("phone").value,
+            DOB: new Date(document.getElementById("dob").value),
+          },
+        };
+      }
+
+      // Handle login button click
+      function handleLogin() {
+        if (!validateForm()) return;
+
+        clevertap.onUserLogin.push(getUserData());
+        alert("Login event pushed to CleverTap!");
+      }
+
+      // Handle profile push button click
+      function handleProfilePush() {
+        if (!validateForm()) return;
+
+        clevertap.profile.push(getUserData());
+        alert("Profile pushed to CleverTap!");
+      }
+
+      // Handle push notification request
+      function handlePushNotification() {
+        clevertap.notifications.push({
+          titleText: "Would you like to receive Push Notifications?",
+          bodyText:
+            "We promise to only send you relevant content and give you updates on your transactions",
+          okButtonText: "Sign me up!",
+          rejectButtonText: "No thanks",
+          askAgainTimeInSeconds: 5,
+          okButtonColor: "#f28046",
+        });
+      }
+
+      // Handle custom event
+      function handleEvent() {
+        if (!validateForm()) return;
+
+        const eventProperties = {
+          "Product name": "Smartphone X",
+          Price: 699.99,
+          "Purchase Time": new Date(),
+          Quantity: 1,
+          Category: "Electronics",
+          "In Stock": true,
+          Rating: 4.5,
+        };
+
+        clevertap.event.push("Product Purchased", eventProperties);
+        alert("Custom event raised with CleverTap!");
+      }
+    </script>
+  </body>
+</html>

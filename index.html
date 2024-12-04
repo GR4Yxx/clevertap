@@ -10,13 +10,7 @@
       sessionStorage.setItem("WZRK_D", "3");
       console.log("Debug mode initialized:", sessionStorage.getItem("WZRK_D"));
 
-      window.clevertapConfig = {
-        serviceWorkerPath: "/clevertap/clevertap_sw.js",
-        serviceWorkerScope: "/clevertap/",
-        skipRegister: true,
-      };
-
-      // Initialize CleverTap
+      // Initialize CleverTap before loading the SDK
       var clevertap = {
         event: [],
         profile: [],
@@ -30,8 +24,32 @@
         },
       };
 
-      // Add account ID
       clevertap.account.push({ id: "Z44-Z4K-K65Z" });
+
+      // Register the service worker ourselves
+      window.addEventListener("load", async () => {
+        try {
+          if ("serviceWorker" in navigator) {
+            const registration = await navigator.serviceWorker.register(
+              "/clevertap/clevertap_sw.js",
+              { scope: "/clevertap/" }
+            );
+            console.log(
+              "Service Worker registered with scope:",
+              registration.scope
+            );
+
+            // Only after successful registration, initialize CleverTap config
+            window.clevertapConfig = {
+              skipRegister: true, // Skip CleverTap's registration since we did it
+              serviceWorkerPath: "/clevertap/clevertap_sw.js",
+              serviceWorkerScope: "/clevertap/",
+            };
+          }
+        } catch (error) {
+          console.error("Service Worker registration failed:", error);
+        }
+      });
     </script>
 
     <!-- CleverTap Integration -->
@@ -40,30 +58,7 @@
         var wzrk = document.createElement("script");
         wzrk.type = "text/javascript";
         wzrk.async = true;
-        wzrk.src =
-          ("https:" == document.location.protocol
-            ? "https://d2r1yp2w7bby2u.cloudfront.net"
-            : "http://static.clevertap.com") + "/js/clevertap.min.js";
-
-        wzrk.onload = function () {
-          // Register service worker after CleverTap loads
-          if ("serviceWorker" in navigator) {
-            navigator.serviceWorker
-              .register("/clevertap/clevertap_sw.js", {
-                scope: "/clevertap/",
-              })
-              .then(function (registration) {
-                console.log(
-                  "Service worker registration succeeded:",
-                  registration
-                );
-              })
-              .catch(function (error) {
-                console.log("Service worker registration failed:", error);
-              });
-          }
-        };
-
+        wzrk.src = "https://d2r1yp2w7bby2u.cloudfront.net/js/clevertap.min.js";
         var s = document.getElementsByTagName("script")[0];
         s.parentNode.insertBefore(wzrk, s);
       })();

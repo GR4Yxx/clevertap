@@ -15,6 +15,19 @@
         serviceWorkerScope: "/clevertap/",
       };
 
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("/clevertap/clevertap_sw.js", {
+            scope: "/clevertap/",
+          })
+          .then(function (registration) {
+            console.log("Service worker registration succeeded:", registration);
+          })
+          .catch(function (error) {
+            console.log("Service worker registration failed:", error);
+          });
+      }
+
       // Initialize CleverTap once
       var clevertap = {
         event: [],

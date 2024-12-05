@@ -5,12 +5,13 @@
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
     <title>CleverTap Integration Demo</title>
 
-    <!-- Enable CleverTap Debug Logging and Configuration -->
+    <!-- Initialize CleverTap -->
     <script type="text/javascript">
-      sessionStorage.setItem("WZRK_D", "3");
+      // Enable debug mode
+      sessionStorage.setItem("WZRK_D", "");
       console.log("Debug mode initialized:", sessionStorage.getItem("WZRK_D"));
 
-      // Initialize CleverTap before loading the SDK
+      // Initialize CleverTap
       var clevertap = {
         event: [],
         profile: [],
@@ -18,47 +19,21 @@
         onUserLogin: [],
         notifications: [],
         privacy: [],
-        debugLevel: 3,
-        debug: function (msg) {
-          console.log("CleverTap Debug:", msg);
-        },
       };
 
       clevertap.account.push({ id: "Z44-Z4K-K65Z" });
-
-      // Register the service worker ourselves
-      window.addEventListener("load", async () => {
-        try {
-          if ("serviceWorker" in navigator) {
-            const registration = await navigator.serviceWorker.register(
-              "/clevertap/clevertap_sw.js",
-              { scope: "/clevertap/" }
-            );
-            console.log(
-              "Service Worker registered with scope:",
-              registration.scope
-            );
-
-            // Only after successful registration, initialize CleverTap config
-            window.clevertapConfig = {
-              skipRegister: true, // Skip CleverTap's registration since we did it
-              serviceWorkerPath: "/clevertap/clevertap_sw.js",
-              serviceWorkerScope: "/clevertap/",
-            };
-          }
-        } catch (error) {
-          console.error("Service Worker registration failed:", error);
-        }
-      });
     </script>
 
-    <!-- CleverTap Integration -->
+    <!-- Load CleverTap SDK -->
     <script type="text/javascript">
       (function () {
         var wzrk = document.createElement("script");
         wzrk.type = "text/javascript";
         wzrk.async = true;
-        wzrk.src = "https://d2r1yp2w7bby2u.cloudfront.net/js/clevertap.min.js";
+        wzrk.src =
+          ("https:" == document.location.protocol
+            ? "https://d2r1yp2w7bby2u.cloudfront.net"
+            : "http://static.clevertap.com") + "/js/clevertap.min.js";
         var s = document.getElementsByTagName("script")[0];
         s.parentNode.insertBefore(wzrk, s);
       })();
@@ -66,7 +41,7 @@
 
     <style>
       body {
-        font-family: "Arial", sans-serif;
+        font-family: "Segoe UI", system-ui, sans-serif;
         max-width: 800px;
         margin: 0 auto;
         padding: 20px;
@@ -76,8 +51,8 @@
       .container {
         background: white;
         padding: 30px;
-        border-radius: 10px;
-        box-shadow: 0 0 10px rgba(0, 0, 0, 0.1);
+        border-radius: 12px;
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       }
 
       h1 {
@@ -92,32 +67,46 @@
 
       label {
         display: block;
-        margin-bottom: 5px;
+        margin-bottom: 8px;
         color: #555;
+        font-weight: 500;
       }
 
       input {
         width: 100%;
-        padding: 8px;
+        padding: 10px;
         border: 1px solid #ddd;
-        border-radius: 4px;
+        border-radius: 6px;
         box-sizing: border-box;
+        font-size: 16px;
+      }
+
+      input:focus {
+        outline: none;
+        border-color: #f28046;
+        box-shadow: 0 0 0 2px rgba(242, 128, 70, 0.2);
       }
 
       .button-group {
         display: grid;
         grid-template-columns: repeat(auto-fit, minmax(200px, 1fr));
-        gap: 10px;
-        margin-top: 20px;
+        gap: 15px;
+        margin-top: 30px;
       }
 
       button {
-        padding: 10px 20px;
+        padding: 12px 24px;
         border: none;
-        border-radius: 4px;
+        border-radius: 6px;
         cursor: pointer;
-        font-weight: bold;
-        transition: background-color 0.3s;
+        font-weight: 600;
+        font-size: 16px;
+        transition: all 0.2s ease;
+      }
+
+      button:hover {
+        transform: translateY(-1px);
+        box-shadow: 0 4px 6px rgba(0, 0, 0, 0.1);
       }
 
       .login-btn {
@@ -140,20 +129,28 @@
         color: white;
       }
 
-      button:hover {
-        opacity: 0.9;
+      .error {
+        color: #dc3545;
+        font-size: 0.875em;
+        margin-top: 5px;
       }
 
-      .error {
-        color: red;
-        font-size: 0.8em;
-        margin-top: 5px;
+      .success-message {
+        display: none;
+        background-color: #d4edda;
+        color: #155724;
+        padding: 15px;
+        border-radius: 6px;
+        margin-bottom: 20px;
+        text-align: center;
       }
     </style>
   </head>
   <body>
     <div class="container">
       <h1>CleverTap Integration Demo</h1>
+
+      <div id="successMessage" class="success-message"></div>
 
       <div class="form-group">
         <label for="name">Name:</label>
@@ -231,8 +228,18 @@
         return isValid;
       }
 
-      // Get user data
-      function getUserData() {
+      // Show success message
+      function showSuccess(message) {
+        const successMessage = document.getElementById("successMessage");
+        successMessage.textContent = message;
+        successMessage.style.display = "block";
+        setTimeout(() => {
+          successMessage.style.display = "none";
+        }, 3000);
+      }
+
+      // Get form data
+      function getFormData() {
         return {
           Site: {
             Name: document.getElementById("name").value,
@@ -247,25 +254,24 @@
       function handleLogin() {
         if (!validateForm()) return;
 
-        const userData = getUserData();
+        const userData = getFormData();
         console.log("Sending login data:", userData);
         clevertap.onUserLogin.push(userData);
-        alert("Login event pushed to CleverTap!");
+        showSuccess("Login successful!");
       }
 
       // Handle profile push button click
       function handleProfilePush() {
         if (!validateForm()) return;
 
-        const userData = getUserData();
+        const userData = getFormData();
         console.log("Pushing profile data:", userData);
         clevertap.profile.push(userData);
-        alert("Profile pushed to CleverTap!");
+        showSuccess("Profile updated successfully!");
       }
 
       // Handle push notification request
       function handlePushNotification() {
-        console.log("Requesting push notification permission");
         clevertap.notifications.push({
           titleText: "Would you like to receive Push Notifications?",
           bodyText:
@@ -293,7 +299,7 @@
 
         console.log("Raising event with properties:", eventProperties);
         clevertap.event.push("Product Purchased", eventProperties);
-        alert("Custom event raised with CleverTap!");
+        showSuccess("Event raised successfully!");
       }
     </script>
   </body>

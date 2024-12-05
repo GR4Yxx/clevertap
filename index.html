@@ -3,7 +3,7 @@
   <head>
     <meta charset="UTF-8" />
     <meta name="viewport" content="width=device-width, initial-scale=1.0" />
-    <link rel="manifest" href="/clevertap/manifest.json" />
+    <link rel="manifest" href="manifest.json" />
     <title>CleverTap Integration Demo</title>
 
     <!-- Initialize CleverTap -->
@@ -24,29 +24,11 @@
       };
 
       clevertap.account.push({ id: "Z44-Z4K-K65Z" });
-      window.addEventListener("load", async () => {
-        try {
-          if ("serviceWorker" in navigator) {
-            const registration = await navigator.serviceWorker.register(
-              "/clevertap/clevertap_sw.js",
-              {
-                scope: "/clevertap/",
-              }
-            );
-            console.log(
-              "Service Worker registered with scope:",
-              registration.scope
-            );
-
-            window.clevertapConfig = {
-              serviceWorkerPath: "/clevertap/clevertap_sw.js",
-              serviceWorkerScope: "/clevertap/",
-            };
-          }
-        } catch (error) {
-          console.error("Service Worker registration failed:", error);
-        }
-      });
+      // Configure service worker path
+      window.clevertapConfig = {
+        serviceWorkerPath: "clevertap_sw.js",
+        serviceWorkerScope: ".",
+      };
     </script>
 
     <!-- Load CleverTap SDK -->
@@ -62,6 +44,28 @@
         var s = document.getElementsByTagName("script")[0];
         s.parentNode.insertBefore(wzrk, s);
       })();
+    </script>
+
+    <!-- Add custom service worker registration -->
+    <script>
+      window.addEventListener("load", async () => {
+        try {
+          if ("serviceWorker" in navigator) {
+            const registration = await navigator.serviceWorker.register(
+              "clevertap_sw.js",
+              {
+                scope: "./",
+              }
+            );
+            console.log(
+              "Service Worker registered successfully:",
+              registration.scope
+            );
+          }
+        } catch (error) {
+          console.error("Service Worker registration failed:", error);
+        }
+      });
     </script>
 
     <style>

@@ -9,10 +9,8 @@
     <!-- Initialize CleverTap -->
     <script type="text/javascript">
       // Enable debug mode
-      sessionStorage.setItem("WZRK_D", "");
-      console.log("Debug mode initialized:", sessionStorage.getItem("WZRK_D"));
+      sessionStorage.setItem("WZRK_D", "3");
 
-      // Initialize CleverTap
       var clevertap = {
         event: [],
         profile: [],
@@ -20,17 +18,36 @@
         onUserLogin: [],
         notifications: [],
         privacy: [],
-        region: "us1",
       };
 
       clevertap.account.push({ id: "Z44-Z4K-K65Z" });
 
-      // Configure service worker path
-      window.clevertapConfig = {
-        serviceWorkerPath: "clevertap_sw.js",
-        serviceWorkerScope: ".",
-        enablePersonalization: true,
-      };
+      // Load CleverTap SDK
+      (function () {
+        var wzrk = document.createElement("script");
+        wzrk.type = "text/javascript";
+        wzrk.async = true;
+        wzrk.src = "https://d2r1yp2w7bby2u.cloudfront.net/js/clevertap.min.js";
+        var s = document.getElementsByTagName("script")[0];
+        s.parentNode.insertBefore(wzrk, s);
+      })();
+    </script>
+
+    <!-- Add service worker registration -->
+    <script>
+      if ("serviceWorker" in navigator) {
+        navigator.serviceWorker
+          .register("clevertap_sw.js")
+          .then(function (registration) {
+            console.log(
+              "Service Worker registered with scope:",
+              registration.scope
+            );
+          })
+          .catch(function (error) {
+            console.error("Service Worker registration failed:", error);
+          });
+      }
     </script>
 
     <!-- Add notification callback handler -->
@@ -323,63 +340,16 @@
 
       // Handle push notification request
       function handlePushNotification() {
-        console.log("Requesting push notification permission");
-
-        // First check if the browser supports notifications
-        if (!("Notification" in window)) {
-          alert("This browser does not support notifications");
-          return;
-        }
-
-        // Check if service worker is registered
-        if (!navigator.serviceWorker.ready) {
-          alert("Service Worker not ready. Please try again in a moment.");
-          return;
-        }
-
-        // If permission is denied, inform the user
-        if (Notification.permission === "denied") {
-          alert(
-            "Notifications are blocked. Please enable them in your browser settings."
-          );
-          return;
-        }
-
-        // Request permission and handle the response
-        Notification.requestPermission()
-          .then(function (permission) {
-            console.log("Notification permission:", permission);
-
-            if (permission === "granted") {
-              // Show CleverTap's opt-in dialog
-              clevertap.notifications.push({
-                titleText: "Would you like to receive Push Notifications?",
-                bodyText:
-                  "We promise to only send you relevant content and give you updates on your transactions",
-                okButtonText: "Sign me up!",
-                rejectButtonText: "No thanks",
-                askAgainTimeInSeconds: 5,
-                okButtonColor: "#f28046",
-                serviceWorkerPath: "clevertap_sw.js",
-                serviceWorkerScope: "./",
-                requireInteraction: true,
-                notificationClickCallback: function (e) {
-                  console.log("Notification clicked:", e);
-                },
-                notificationDismissedCallback: function (e) {
-                  console.log("Notification dismissed:", e);
-                },
-              });
-
-              console.log("CleverTap notification prompt triggered");
-            }
-          })
-          .catch(function (error) {
-            console.error("Error requesting notification permission:", error);
-            alert("There was an error requesting notification permission");
-          });
+        clevertap.notifications.push({
+          titleText: "Would you like to receive Push Notifications?",
+          bodyText:
+            "We promise to only send you relevant content and give you updates on your transactions",
+          okButtonText: "Sign me up!",
+          rejectButtonText: "No thanks",
+          okButtonColor: "#f28046",
+          skipDialog: false,
+        });
       }
-
       // Handle custom event
       function handleEvent() {
         if (!validateForm()) return;

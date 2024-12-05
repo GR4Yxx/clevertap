@@ -1,16 +1,11 @@
 {
   "name": "CleverTap Demo",
-  "short_name": "CT Demo",
   "gcm_sender_id": "1377720779684",
-  "start_url": ".",
-  "display": "standalone",
-  "background_color": "#ffffff",
-  "theme_color": "#f28046",
   "icons": [
     {
-      "src": "icon.png",
+      "src": "icon.svg",
       "sizes": "192x192",
-      "type": "image/png"
+      "type": "image/svg+xml"
     }
   ]
 }

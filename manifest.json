@@ -1,4 +1,16 @@
 {
   "name": "CleverTap Demo",
-  "gcm_sender_id": "1377720779684"
+  "short_name": "CT Demo",
+  "gcm_sender_id": "1377720779684",
+  "start_url": ".",
+  "display": "standalone",
+  "background_color": "#ffffff",
+  "theme_color": "#f28046",
+  "icons": [
+    {
+      "src": "https://d35fo82fjcw0y8.cloudfront.net/2018/07/26020307/clevertap-logo-164x164.png",
+      "sizes": "164x164",
+      "type": "image/png"
+    }
+  ]
 }

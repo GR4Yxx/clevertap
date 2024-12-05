@@ -31,6 +31,28 @@
       };
     </script>
 
+    <script>
+      // Add this after clevertap initialization but before the SDK loads
+      clevertap.enablePersonalization = true;
+
+      // After the SDK loads, register for push
+      window.addEventListener("load", function () {
+        // Check if push notification is supported
+        if ("Notification" in window) {
+          if (Notification.permission === "granted") {
+            console.log("Push notifications are already enabled");
+          } else if (Notification.permission !== "denied") {
+            // Only show the prompt if permission is not denied
+            Notification.requestPermission().then(function (permission) {
+              if (permission === "granted") {
+                console.log("Push notifications are now enabled");
+              }
+            });
+          }
+        }
+      });
+    </script>
+
     <!-- Load CleverTap SDK -->
     <script type="text/javascript">
       (function () {
@@ -301,15 +323,49 @@
 
       // Handle push notification request
       function handlePushNotification() {
-        clevertap.notifications.push({
-          titleText: "Would you like to receive Push Notifications?",
-          bodyText:
-            "We promise to only send you relevant content and give you updates on your transactions",
-          okButtonText: "Sign me up!",
-          rejectButtonText: "No thanks",
-          askAgainTimeInSeconds: 5,
-          okButtonColor: "#f28046",
-        });
+        if (!("Notification" in window)) {
+          console.log("This browser does not support notifications");
+          return;
+        }
+
+        if (Notification.permission === "denied") {
+          console.log("Notifications are blocked by the browser");
+          return;
+        }
+
+        // First request browser's notification permission
+        Notification.requestPermission()
+          .then((permission) => {
+            if (permission === "granted") {
+              // Then show CleverTap's notification prompt
+              clevertap.notifications.push({
+                titleText: "Would you like to receive Push Notifications?",
+                bodyText:
+                  "We promise to only send you relevant content and give you updates on your transactions",
+                okButtonText: "Sign me up!",
+                rejectButtonText: "No thanks",
+                askAgainTimeInSeconds: 5,
+                okButtonColor: "#f28046",
+                serviceWorkerPath: "clevertap_sw.js", // Specify the service worker path
+                serviceWorkerScope: "./", // Specify the scope
+              });
+
+              // Add notification callback
+              clevertap.notificationCallback = function (msg) {
+                console.log("Notification callback executed", msg);
+                // Raise notification viewed and clicked events
+                clevertap.raiseNotificationViewed();
+
+                // You can handle notification clicks here
+                if (msg.msg.hasOwnProperty("kv")) {
+                  console.log("Custom key-value pairs:", msg.msg.kv);
+                }
+              };
+            }
+          })
+          .catch((error) => {
+            console.error("Error requesting notification permission:", error);
+          });
       }
 
       // Handle custom event
